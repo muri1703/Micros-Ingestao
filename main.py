@@ -16,15 +16,14 @@ from use_cases.deletar_arquivo import DeletarArquivoUseCase
 app = FastAPI(title="Microsserviço de Ingestão e Armazenamento")
 
 # O Front-End exato que tem permissão para consumir esta API
-origens_permitidas = [
-    "https://projfrontend.azurewebsites.net",
-]
+#origens_permitidas = [
+#    "https://projfrontend.azurewebsites.net/",
+#]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origens_permitidas, 
     allow_credentials=True,
-    allow_methods=["*"], # Permite GET, POST, DELETE, etc.
+    allow_methods=["*"], 
     allow_headers=["*"],
 )
 
