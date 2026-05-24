@@ -3,12 +3,25 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+@dataclass
+class Pasta:
+    nome: str
+    projeto_id: int
+    id: Optional[int] = None
+    data_criacao: datetime = field(default_factory=datetime.now)
+
+    def validar(self):
+        if not self.nome:
+            raise ValueError("A pasta precisa ter um nome.")
+        if self.projeto_id <= 0:
+            raise ValueError("ID de projeto inválido.")
 
 @dataclass
 class Arquivo:
     nome_original: str
     projeto_id: int  # Nota: Ele só conhece o ID do projeto, não a entidade Projeto inteira!
     conteudo_binario: bytes
+    pasta_id: Optional[int] = None  # Novo campo para o relacionamento com a Pasta
     tipo: Optional[str] = None
     tamanho_bytes: int = field(init=False)
     id: Optional[int] = None

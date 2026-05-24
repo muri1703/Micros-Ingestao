@@ -1,0 +1,9 @@
+# Arquivos e pastas a ignorar
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+banco_ingestao.sqlite
+executar_migracao.py
+.env
