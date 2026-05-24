@@ -29,6 +29,22 @@ app.add_middleware(
 )
 
 db_path = "banco_ingestao.sqlite"
+
+# --- GARANTIR TABELAS NO ARRANCQUE ---
+def inicializar_banco():
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS pastas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                projeto_id INTEGER NOT NULL
+            )
+        """)
+        conn.commit()
+
+inicializar_banco()
+
 repositorio_db = SQLiteArquivoRepository(caminho_banco=db_path)
 storage_disco = LocalStorageAdapter(diretorio_base="armazenamento_local")
 
