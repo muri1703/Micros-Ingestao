@@ -4,6 +4,5 @@ __pycache__/
 *.pyo
 *.pyd
 .venv/
-banco_ingestao.sqlite
 executar_migracao.py
 .env
