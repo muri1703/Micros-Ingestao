@@ -16,14 +16,7 @@ from domain.entidades import Arquivo, Pasta
 
 app = FastAPI(title="Microsserviço de Ingestão e Armazenamento")
 
-# Configuração CORS (Mantida)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # Ajuste conforme necessário
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 db_path = "banco_ingestao.sqlite"
 repositorio_db = SQLiteArquivoRepository(caminho_banco=db_path)
