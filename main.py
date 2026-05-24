@@ -18,8 +18,6 @@ app = FastAPI(title="Microsserviço de Ingestão e Armazenamento")
 
 origins = [
     "https://mod2eng.azurewebsites.net",
-    "http://localhost",
-    "http://localhost:8080",
 ]
 
 app.add_middleware(
