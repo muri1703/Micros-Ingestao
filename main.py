@@ -16,17 +16,6 @@ from domain.entidades import Arquivo, Pasta
 
 app = FastAPI(title="Microsserviço de Ingestão e Armazenamento")
 
-origins = [
-    "https://mod2eng.azurewebsites.net",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 db_path = "banco_ingestao.sqlite"
 
