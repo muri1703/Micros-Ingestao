@@ -59,6 +59,7 @@ class ArquivoResponse(BaseModel):
     tipo: str
     tamanho_bytes: int
     data_ingestao: datetime
+    pasta_id: Optional[int] = None
 
 class PastaCreate(BaseModel):
     nome: str
