@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 import sqlite3
+from fastapi.middleware.cors import CORSMiddleware
 
 # Importações da Arquitetura Limpa
 from use_cases.upload_arquivo import UploadArquivoUseCase, ListarArquivosUseCase
@@ -15,6 +16,14 @@ from domain.entidades import Arquivo, Pasta
 
 app = FastAPI(title="Microsserviço de Ingestão e Armazenamento")
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 db_path = "banco_ingestao.sqlite"
 
