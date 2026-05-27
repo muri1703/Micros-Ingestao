@@ -19,31 +19,17 @@ class SQLiteArquivoRepository(IArquivoRepository):
         return sqlite3.connect(self.caminho_banco)
 
     def _criar_tabela_se_nao_existir(self):
-        # Repara que não existe 'FOREIGN KEY' restrita ao outro banco de dados.
-        # Em microsserviços, o 'projeto_id' é apenas um número inteiro para referência.
+        # Adicionada a coluna pasta_id
         query = """
-                CREATE TABLE IF NOT EXISTS arquivos \
-                ( \
-                    id \
-                    INTEGER \
-                    PRIMARY \
-                    KEY \
-                    AUTOINCREMENT, \
-                    nome_original \
-                    TEXT \
-                    NOT \
-                    NULL, \
-                    projeto_id \
-                    INTEGER \
-                    NOT \
-                    NULL, \
-                    tipo \
-                    TEXT, \
-                    tamanho_bytes \
-                    INTEGER, \
-                    data_ingestao \
-                    TIMESTAMP
-                ) \
+                CREATE TABLE IF NOT EXISTS arquivos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome_original TEXT NOT NULL,
+                    projeto_id INTEGER NOT NULL,
+                    tipo TEXT,
+                    tamanho_bytes INTEGER,
+                    data_ingestao TIMESTAMP,
+                    pasta_id INTEGER
+                )
                 """
         with self._conectar() as conn:
             conn.execute(query)
@@ -55,24 +41,25 @@ class SQLiteArquivoRepository(IArquivoRepository):
             if arquivo.id:
                 query = """
                         UPDATE arquivos
-                        SET nome_original = ?, \
-                            projeto_id    = ?, \
-                            tipo          = ?, \
-                            tamanho_bytes = ?
-                        WHERE id = ? \
+                        SET nome_original = ?,
+                            projeto_id    = ?,
+                            tipo          = ?,
+                            tamanho_bytes = ?,
+                            pasta_id      = ?
+                        WHERE id = ?
                         """
                 cursor.execute(query, (
                     arquivo.nome_original, arquivo.projeto_id,
-                    arquivo.tipo, arquivo.tamanho_bytes, arquivo.id
+                    arquivo.tipo, arquivo.tamanho_bytes, getattr(arquivo, 'pasta_id', None), arquivo.id
                 ))
             else:
                 query = """
-                        INSERT INTO arquivos (nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao)
-                        VALUES (?, ?, ?, ?, ?) \
+                        INSERT INTO arquivos (nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao, pasta_id)
+                        VALUES (?, ?, ?, ?, ?, ?)
                         """
                 cursor.execute(query, (
                     arquivo.nome_original, arquivo.projeto_id,
-                    arquivo.tipo, arquivo.tamanho_bytes, arquivo.data_ingestao
+                    arquivo.tipo, arquivo.tamanho_bytes, arquivo.data_ingestao, getattr(arquivo, 'pasta_id', None)
                 ))
                 arquivo.id = cursor.lastrowid
 
@@ -80,19 +67,23 @@ class SQLiteArquivoRepository(IArquivoRepository):
         return arquivo
 
     def buscar_por_projeto(self, projeto_id: int) -> List[Arquivo]:
+        # Adicionado o pasta_id no SELECT
         query = """
-                SELECT id, nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao
-                FROM arquivos \
-                WHERE projeto_id = ? \
+                SELECT id, nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao, pasta_id
+                FROM arquivos 
+                WHERE projeto_id = ? 
                 ORDER BY data_ingestao DESC
                 """
         arquivos = []
         with self._conectar() as conn:
             cursor = conn.cursor()
-            linhas = cursor.execute(query, (projeto_id,)).fetchall()
+            try:
+                linhas = cursor.execute(query, (projeto_id,)).fetchall()
+            except sqlite3.OperationalError:
+                # Caso o banco de dados antigo ainda não tenha a coluna, retorna vazio para evitar quebrar tudo
+                return []
 
             for linha in linhas:
-                # Criamos a entidade sem carregar o binário, pois aqui só queremos os metadados para listar na UI
                 arq = Arquivo(
                     nome_original=linha[1],
                     projeto_id=linha[2],
@@ -102,7 +93,7 @@ class SQLiteArquivoRepository(IArquivoRepository):
                 arq.tipo = linha[3]
                 arq.tamanho_bytes = linha[4]
                 arq.data_ingestao = linha[5]
-                arq.pasta_id = linha[6] 
+                arq.pasta_id = linha[6] if len(linha) > 6 else None
                 arquivos.append(arq)
 
         return arquivos
@@ -116,19 +107,22 @@ class SQLiteArquivoRepository(IArquivoRepository):
             return cursor.rowcount > 0
 
     def buscar_por_id(self, arquivo_id: int) -> Arquivo:
+        # Adicionado o pasta_id no SELECT
         query = """
-                SELECT id, nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao
+                SELECT id, nome_original, projeto_id, tipo, tamanho_bytes, data_ingestao, pasta_id
                 FROM arquivos
                 WHERE id = ?
                 """
         with self._conectar() as conn:
             cursor = conn.cursor()
-            linha = cursor.execute(query, (arquivo_id,)).fetchone()
+            try:
+                linha = cursor.execute(query, (arquivo_id,)).fetchone()
+            except sqlite3.OperationalError:
+                return None
 
             if not linha:
                 return None
 
-            # Criamos a entidade
             arq = Arquivo(
                 nome_original=linha[1],
                 projeto_id=linha[2],
@@ -138,5 +132,6 @@ class SQLiteArquivoRepository(IArquivoRepository):
             arq.tipo = linha[3]
             arq.tamanho_bytes = linha[4]
             arq.data_ingestao = linha[5]
+            arq.pasta_id = linha[6] if len(linha) > 6 else None
 
             return arq
