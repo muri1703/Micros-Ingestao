@@ -63,4 +63,4 @@ jobs:
         with:
           app-name: 'IngestaoMod2'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3111481C66E14DD8A8EDA851BA8A6807 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_98185F1478634E69A587776CE73A27EB }}
