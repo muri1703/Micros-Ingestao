@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -94,7 +94,7 @@ def mover_arquivo(arquivo_id: int, pasta_id: Optional[int] = None):
 # --- ROTAS DE ARQUIVOS (Originais) ---
 
 @app.post("/api/postarquivos/projeto/{projeto_id}", response_model=ArquivoResponse)
-async def fazer_upload(projeto_id: int = Form(...), file: UploadFile = File(...)):
+async def fazer_upload(projeto_id: int, file: UploadFile = File(...)):
     conteudo_binario = await file.read()
     return upload_use_case.executar(file.filename, projeto_id, conteudo_binario)
 
