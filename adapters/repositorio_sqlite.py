@@ -102,6 +102,7 @@ class SQLiteArquivoRepository(IArquivoRepository):
                 arq.tipo = linha[3]
                 arq.tamanho_bytes = linha[4]
                 arq.data_ingestao = linha[5]
+                arq.pasta_id = linha[6] 
                 arquivos.append(arq)
 
         return arquivos
