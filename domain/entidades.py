@@ -50,6 +50,6 @@ class Arquivo:
             raise ValueError("O arquivo está vazio (0 bytes).")
 
         # Opcional: Limitar os tipos de ficheiros aceites logo na raiz do negócio
-        formatos_permitidos = ['pdf', 'txt', 'docx', 'csv']
+        formatos_permitidos = ['pdf', 'txt', 'docx', 'csv', 'json']
         if self.tipo not in formatos_permitidos:
             raise ValueError(f"Formato não suportado: {self.tipo}. Apenas aceitamos: {formatos_permitidos}")
