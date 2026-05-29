@@ -100,6 +100,31 @@ def mover_arquivo(arquivo_id: int, pasta_id: Optional[int] = None):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+# NOVA ROTA: Deletar Pasta
+@app.delete("/api/pastas/{pasta_id}")
+def deletar_pasta(pasta_id: int):
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Verifica se a pasta existe
+            cursor.execute("SELECT id FROM pastas WHERE id = ?", (pasta_id,))
+            if not cursor.fetchone():
+                raise HTTPException(status_code=404, detail="Pasta não encontrada")
+            
+            # Move os arquivos da pasta para a raiz (pasta_id = NULL)
+            cursor.execute("UPDATE arquivos SET pasta_id = NULL WHERE pasta_id = ?", (pasta_id,))
+            
+            # Deleta a pasta
+            cursor.execute("DELETE FROM pastas WHERE id = ?", (pasta_id,))
+            
+            conn.commit()
+            return {"status": "sucesso", "mensagem": "Pasta excluída e arquivos movidos para a raiz"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 # --- ROTAS DE ARQUIVOS (Originais) ---
 
 @app.post("/api/postarquivos/projeto/{projeto_id}", response_model=ArquivoResponse)
